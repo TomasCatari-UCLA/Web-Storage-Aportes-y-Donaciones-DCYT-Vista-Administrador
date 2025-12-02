@@ -10,7 +10,7 @@ export default class Cl_mDCYT {
   private db: Cl_dcytDb;
   private aportes: Cl_mAporte[];
 
-  readonly tbAporte: string = "dcyt_aportes";
+  readonly tbAporte: string = "TCR_aportes";
 
   constructor() {
     this.db = new Cl_dcytDb({ aliasCuenta: "THE CODE RANGERS" });
