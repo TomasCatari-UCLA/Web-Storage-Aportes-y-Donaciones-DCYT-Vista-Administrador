@@ -1,0 +1,207 @@
+import Cl_mAporte, {
+  iAporte,
+  LISTA_TIPOS,
+  LISTA_TIPO_DONADOR,
+} from "./Cl_mAporte.js"; // CAMBIADO
+import Cl_vGeneral from "./tools/Cl_vGeneral.js";
+import { opcionFicha } from "./tools/core.tools.js";
+
+export default class Cl_vAporte extends Cl_vGeneral {
+  // CAMBIADO
+  // Elementos del FORMULARIO (Agregar/Editar)
+  private vistaFormulario: HTMLElement;
+  private lblTitulo: HTMLLabelElement;
+  private inIdAporte: HTMLInputElement;
+  private inFecha: HTMLInputElement;
+  private slTipo: HTMLSelectElement;
+  private inDescripcion: HTMLInputElement;
+  private inMonto: HTMLInputElement;
+  private inNomDonador: HTMLInputElement;
+  private slTipoDonador: HTMLSelectElement; // CAMBIADO
+  private btAceptar: HTMLButtonElement;
+  private btGuardar: HTMLButtonElement;
+  private btCancelar: HTMLButtonElement;
+
+  // Elementos de CONSULTA (Leer)
+  private vistaConsultar: HTMLElement;
+  private lblC_IdAporte: HTMLElement;
+  private lblC_Fecha: HTMLElement;
+  private lblC_Tipo: HTMLElement;
+  private lblC_Descripcion: HTMLElement;
+  private lblC_Monto: HTMLElement;
+  private lblC_NomDonador: HTMLElement;
+  private lblC_TipoDonador: HTMLElement; // CAMBIADO
+  private btVolver: HTMLButtonElement;
+
+  private opcion: opcionFicha = opcionFicha.add;
+  private _id: number | null = null;
+
+  constructor() {
+    super({ formName: "aporte" }); // CAMBIADO: ID del formulario en index.html
+
+    this.vistaFormulario = document.getElementById("aporte") as HTMLElement; // CAMBIADO
+    this.lblTitulo = document.getElementById(
+      "aporte_lblTitulo"
+    ) as HTMLLabelElement; // CAMBIADO
+
+    // Conexión de inputs para Aporte
+    this.inIdAporte = this.crearHTMLInputElement("inIdAporte");
+    this.inFecha = this.crearHTMLInputElement("inFecha");
+    this.inDescripcion = this.crearHTMLInputElement("inDescripcion");
+    this.inMonto = this.crearHTMLInputElement("inMonto");
+    this.inNomDonador = this.crearHTMLInputElement("inNomDonador");
+
+    this.slTipo = this.crearHTMLSelectElement("slTipo", {
+      elementsSource: LISTA_TIPOS,
+    }); // CAMBIADO
+    this.slTipoDonador = this.crearHTMLSelectElement("slTipoDonador", {
+      elementsSource: LISTA_TIPO_DONADOR,
+    }); // CAMBIADO
+
+    this.btAceptar = this.crearHTMLButtonElement("btAceptar", {
+      onclick: () => this.procesar(opcionFicha.add),
+    });
+    this.btGuardar = this.crearHTMLButtonElement("btGuardar", {
+      onclick: () => this.procesar(opcionFicha.edit),
+    });
+    this.btCancelar = this.crearHTMLButtonElement("btCancelar", {
+      onclick: () => this.cerrar(),
+    });
+
+    this.vistaConsultar = document.getElementById(
+      "consultarAporte"
+    ) as HTMLElement; // CAMBIADO
+    // Conexión de labels para Consulta de Aporte
+    this.lblC_IdAporte = document.getElementById(
+      "consultar_lblIdAporte"
+    ) as HTMLElement; // CAMBIADO
+    this.lblC_Fecha = document.getElementById(
+      "consultar_lblFecha"
+    ) as HTMLElement; // CAMBIADO
+    this.lblC_Tipo = document.getElementById(
+      "consultar_lblTipo"
+    ) as HTMLElement; // CAMBIADO
+    this.lblC_Descripcion = document.getElementById(
+      "consultar_lblDescripcion"
+    ) as HTMLElement; // CAMBIADO
+    this.lblC_Monto = document.getElementById(
+      "consultar_lblMonto"
+    ) as HTMLElement; // CAMBIADO
+    this.lblC_NomDonador = document.getElementById(
+      "consultar_lblNomDonador"
+    ) as HTMLElement; // CAMBIADO
+    this.lblC_TipoDonador = document.getElementById(
+      "consultar_lblTipoDonador"
+    ) as HTMLElement; // CAMBIADO
+
+    this.btVolver = document.getElementById(
+      "consultar_btVolver"
+    ) as HTMLButtonElement;
+    if (this.btVolver) this.btVolver.onclick = () => this.cerrar();
+  }
+
+  show({
+    ver,
+    aporte,
+    opcion,
+  }: {
+    ver: boolean;
+    aporte?: Cl_mAporte;
+    opcion?: opcionFicha;
+  }) {
+    // CAMBIADO
+    this.vistaFormulario.style.display = "none";
+    this.vistaConsultar.style.display = "none";
+
+    if (ver && opcion !== undefined) {
+      this.opcion = opcion;
+
+      this.btAceptar.style.display = "none";
+      this.btGuardar.style.display = "none";
+      this.inIdAporte.disabled = false; // CAMBIADO: Usar inIdAporte
+
+      if (this.opcion === opcionFicha.add) {
+        this.vistaFormulario.style.display = "block";
+        this.lblTitulo.innerText = "Agregar Aporte"; // CAMBIADO
+        this._id = null;
+        this.btAceptar.style.display = "inline-block";
+        this.limpiarCampos();
+      } else if (this.opcion === opcionFicha.edit && aporte) {
+        // CAMBIADO
+        this.vistaFormulario.style.display = "block";
+        this.lblTitulo.innerText = "Editar Aporte"; // CAMBIADO
+        this._id = aporte.id; // CAMBIADO
+        this.btGuardar.style.display = "inline-block";
+        this.llenarCampos(aporte); // CAMBIADO
+        this.inIdAporte.disabled = true; // CAMBIADO: Usar inIdAporte
+      } else if (aporte) {
+        // Mostrar la vista de consulta si se recibió un aporte (evita usar opcionFicha.read)
+        this.vistaConsultar.style.display = "block";
+        this.lblC_IdAporte.innerText = aporte.idAporte; // CAMBIADO
+        this.lblC_Fecha.innerText = aporte.fechaStr; // CAMBIADO: usar fechaStr
+        this.lblC_Tipo.innerText = aporte.tipo; // CAMBIADO
+        this.lblC_Descripcion.innerText = aporte.descripcion; // CAMBIADO
+        this.lblC_Monto.innerText = "Bs. " + aporte.monto.toFixed(2); // CAMBIADO: formato de moneda
+        this.lblC_NomDonador.innerText = aporte.nombreDonador; // CAMBIADO
+        this.lblC_TipoDonador.innerText = aporte.tipoDonador; // CAMBIADO
+      }
+    }
+  }
+
+  limpiarCampos() {
+    // CAMBIADO: Campos de Aporte
+    this.inIdAporte.value = "";
+    this.inFecha.value = "";
+    this.slTipo.selectedIndex = 0;
+    this.inDescripcion.value = "";
+    this.inMonto.value = "";
+    this.inNomDonador.value = "";
+    this.slTipoDonador.selectedIndex = 0;
+  }
+
+  llenarCampos(aporte: Cl_mAporte) {
+    // CAMBIADO
+    // CAMBIADO: Campos de Aporte
+    this.inIdAporte.value = aporte.idAporte;
+    this.inFecha.value = aporte.fechaStr; // CAMBIADO: Usar el formato YYYY-MM-DD para el input type="date"
+    this.slTipo.value = aporte.tipo;
+    this.inDescripcion.value = aporte.descripcion;
+    this.inMonto.value = String(aporte.monto);
+    this.inNomDonador.value = aporte.nombreDonador;
+    this.slTipoDonador.value = aporte.tipoDonador;
+  }
+
+  cerrar() {
+    this.controlador!.activarVista({ vista: "dcyt" });
+  }
+
+  procesar(accion: opcionFicha) {
+    // El input de fecha de HTML da "YYYY-MM-DD". Necesitas convertirlo a número (YYYYMMDD)
+    const fechaInput = this.inFecha.value.replace(/-/g, ""); // "2025-10-30" -> "20251030"
+
+    const datos: iAporte = {
+      // CAMBIADO
+      id: this._id,
+      creadoEl: null,
+      alias: null,
+      idAporte: this.inIdAporte.value, // CAMBIADO
+      fecha: Number(fechaInput), // CAMBIADO: Conversión a número YYYYMMDD
+      tipo: this.slTipo.value as any, // CAMBIADO
+      descripcion: this.inDescripcion.value, // CAMBIADO
+      monto: Number(this.inMonto.value), // CAMBIADO
+      nombreDonador: this.inNomDonador.value, // CAMBIADO
+      tipoDonador: this.slTipoDonador.value as any, // CAMBIADO
+    };
+
+    const callback = (error: string | boolean) => {
+      if (error) alert("Error: " + error);
+      else this.controlador!.activarVista({ vista: "dcyt" }); // REDIRECCIÓN AL ÉXITO
+    };
+
+    if (accion === opcionFicha.add) {
+      this.controlador!.addAporte({ dtAporte: datos, callback }); // CAMBIADO: Llamar a addAporte
+    } else {
+      this.controlador!.editAporte({ dtAporte: datos, callback }); // CAMBIADO: Llamar a editAporte
+    }
+  }
+}
