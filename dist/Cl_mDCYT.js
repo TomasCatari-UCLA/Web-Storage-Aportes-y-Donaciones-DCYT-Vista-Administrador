@@ -1,8 +1,8 @@
-import Cl_dcytDb from "https://gtplus.net/forms2/dcytDb/api/Cl_dcytDb.php?v251110-2150";
+import Cl_dcytDb from "https://gtplus.net/forms2/dcytDb/api/Cl_dcytDb.php?v251203-1117";
 import Cl_mAporte from "./Cl_mAporte.js";
 export default class Cl_mDCYT {
     constructor() {
-        this.tbAporte = "dcyt_aportes";
+        this.tbAporte = "TCR_aportes";
         this.db = new Cl_dcytDb({ aliasCuenta: "THE CODE RANGERS" });
         this.aportes = [];
     }

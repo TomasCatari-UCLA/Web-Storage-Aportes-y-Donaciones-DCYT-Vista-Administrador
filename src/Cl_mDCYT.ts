@@ -1,4 +1,4 @@
-import Cl_dcytDb from "https://gtplus.net/forms2/dcytDb/api/Cl_dcytDb.php?v251110-2150"; 
+import Cl_dcytDb from "https://gtplus.net/forms2/dcytDb/api/Cl_dcytDb.php?v251203-1117"; 
 import Cl_mAporte, { iAporte } from "./Cl_mAporte.js";
 
 interface iResultEquipos {
